@@ -2,33 +2,33 @@ const NotesService = {
   getAllNotes(db) {
     return db
       .select('*')
-      .from('notes_table');
+      .from('notes');
   },
   getNoteById(db, id) {
     return db
       .select('*')
-      .from('notes_table')
+      .from('notes')
       .where('id', id)
       .first();
   },
   insertNote(db, newNote) {
     return db
       .insert(newNote)
-      .into('notes_table')
+      .into('notes')
       .returning('*')
       .then(rows => rows[0])
   },
   deleteNote(db, id) {
     return db
-      .from('notes_table')
-      .where('id', id)
+      .from('notes')
+      .where({id})
       .delete()
   },
   updateNote(db, id, newNoteFields) {
     return db
-      .from('notes_table')
+      .from('notes')
       .update(newNoteFields)
-      .where('id', id)
+      .where({id})
   }
 }
 

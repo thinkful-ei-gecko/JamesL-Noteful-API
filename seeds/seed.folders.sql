@@ -1,4 +1,4 @@
-INSERT INTO folders_table (folder_name)
+INSERT INTO folders (folder_name)
 VALUES
   ('Cat'),
   ('Dog'),

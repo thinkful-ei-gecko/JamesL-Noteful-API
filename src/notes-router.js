@@ -8,9 +8,10 @@ const jsonParser = express.json();
 
 const serializeNote = note => ({
   id: note.id,
-  note_name: xss(note.note_name),
+  title: xss(note.title),
+  date_modified: note.date_modified,
   content: xss(note.content),
-  folder: note.folder
+  folder_id: note.folder_id
 })
 
 notesRouter
@@ -22,17 +23,17 @@ notesRouter
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { note_name, content, folder } = req.body
-    const newNote = { note_name, content, folder }
+    const { title, content, folder_id } = req.body
+    const newNote = { title, content, folder_id }
     const db = req.app.get('db')
 
-    if(!note_name) {
-      return res.status(400).json( {error: {message: 'Note name is required'}} )
+    if(!title) {
+      return res.status(400).json( {error: {message: 'Title is required'}} )
     }
     if(!content) {
       return res.status(400).json( {error: {message: 'Content is required'}} )
     }
-    if(!folder) {
+    if(!folder_id) {
       return res.status(400).json( {error: {message: 'Folder is required'}} )
     }
 
@@ -47,12 +48,12 @@ notesRouter
   });
 
 notesRouter
-  .route('/:noteId')
+  .route('/:note_id')
   .all((req, res, next) => {
     const db = req.app.get('db')
-    const id = req.params.noteId
+    const id = req.params.note_id
 
-    NotesService.getNoteById(db,id)
+    NotesService.getNoteById(db, id)
       .then(note => {
         if(!note) {
           return res.status(404).json( {error: {message: `Note doesn't exist`}} )
@@ -63,32 +64,32 @@ notesRouter
       .catch(next)
   })
   .get((req,res,next) => {
-    res.status(200).json(res.note)
+    res.status(200).json(serializeNote(res.note))
   })
   .delete((req, res, next) => {
     const db = req.app.get('db')
-    const id = req.params.noteId
+    const id = req.params.note_id
 
-    NotesService.deleteNote(db,id)
-      .then(() => {
+    NotesService.deleteNote(db, id)
+      .then(numRowsAffected => {
         res.status(204).end()
       })
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { note_name, content, folder } = req.body;
-    const noteToUpdate = { note_name, content, folder }; // We are allowing notes to be moved into different folders
+    const { text, date_noted } = req.body;
+    const noteToUpdate = { text, date_noted }; 
 
     const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length;
     if(numberOfValues === 0) {
-      return res.status(400).json( {error: {message: `Request body must contain either 'note name', 'content', or 'folder'`}});
+      return res.status(400).json( {error: {message: `Request body must contain either text or date_noted'`}});
     }
 
     const db = req.app.get('db')
-    const id = req.params.noteId
+    const id = req.params.note_id
 
     NotesService.updateNote(db,id,noteToUpdate)
-      .then(() => {
+      .then(numRowsAffected => {
         res.status(204).end()
       })
       .catch(next)

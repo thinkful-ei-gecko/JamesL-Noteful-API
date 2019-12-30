@@ -1,4 +1,4 @@
-INSERT INTO notes_table (note_name, content, folder)
+INSERT INTO notes (title, content, folder_id)
 VALUES
   ('Best', 'Dogs are the best pets', 2),
   ('Kitty', 'Cats need less attention than dogs', 1),
